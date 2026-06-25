@@ -8,6 +8,10 @@ spring:
     password: postgres
     driver-class-name: org.postgresql.Driver
 
+  data:
+    mongodb:
+      url: mongodb://localhost:27017/calorieCounter
+
   kafka:
     bootstrap-servers: localhost:29092
     producer:

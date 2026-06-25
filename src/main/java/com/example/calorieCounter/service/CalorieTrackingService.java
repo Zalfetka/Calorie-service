@@ -6,16 +6,17 @@ import com.example.calorieCounter.entity.Food;
 import com.example.calorieCounter.entity.KafkaMessageLogEntity;
 import com.example.calorieCounter.enums.Status;
 import com.example.calorieCounter.exeption.FoodNotFoundException;
+import com.example.calorieCounter.exeption.UserNotFoundException;
 import com.example.calorieCounter.kafka.UserProducer;
 import com.example.calorieCounter.repository.CalorieRepo;
 import com.example.calorieCounter.repository.FoodRepo;
 import com.example.calorieCounter.repository.KafkaMessageLogRepository;
+import com.example.calorieCounter.repository.CalorieMongoRepo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.producer.KafkaProducer;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -36,6 +37,7 @@ public class CalorieTrackingService {
     private final UserProducer userProducer;
     private final KafkaMessageLogRepository kafkaMessageLogRepository;
     private final ObjectMapper objectMapper;
+    private final CalorieMongoRepo mongoRepo;
 
     @Transactional
     public CalorieDifferenceResponse addCaloriesAndGetDifference(Long userId, CalorieIntakeBatchRequest request) throws JsonProcessingException {
@@ -62,6 +64,15 @@ public class CalorieTrackingService {
             dailyCalories.setConsumedCarbs(dailyCalories.getConsumedCarbs() + carbs);
         }
         calorieRepo.save(dailyCalories);
+        DailyCaloriesMongo mongoDoc = new DailyCaloriesMongo();
+        mongoDoc.setId(UUID.randomUUID().toString());
+        mongoDoc.setUserId(user.getUserId());
+        mongoDoc.setDate(LocalDate.now());
+        mongoDoc.setConsumedCalories(dailyCalories.getConsumedCalories());
+        mongoDoc.setConsumedProteins(dailyCalories.getConsumedProteins());
+        mongoDoc.setConsumedFats(dailyCalories.getConsumedFats());
+        mongoDoc.setConsumedCarbs(dailyCalories.getConsumedCarbs());
+        mongoRepo.save(mongoDoc);
         userProducer.send(buildEvent(userId, dailyCalories));
         return buildFullResponse(dailyCalories);
     }
@@ -131,5 +142,10 @@ public class CalorieTrackingService {
         } catch (Exception e) {
             throw new RuntimeException("JSON serialization error", e);
         }
+    }
+
+    public DailyCalories getDailyCalories(Long userId, LocalDate date) {
+        return calorieRepo.findByUserIdAndDate(userId,date).orElseThrow(
+                () -> new UserNotFoundException("User not found: " + userId));
     }
 }

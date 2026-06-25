@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   postgres:
-    image: postgres:15
+    image: postgres:18
     container_name: postgres
     environment:
       POSTGRES_DB: foodcounter
@@ -50,6 +50,37 @@ services:
       - food-network
     restart: unless-stopped
 
+  mongo:
+    image: mongo:7
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: foodcounter
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - food-network
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: redis
+    ports:
+      - "6379:6379"
+    environment:
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - redis_data:/data
+    networks:
+      - food-network
+    restart: unless-stopped
+
 networks:
   food-network:
     driver: bridge
+
+volumes:
+  mongo_data:
+  redis_data:

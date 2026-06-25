@@ -1,21 +1,21 @@
 package com.example.calorieCounter.annotation;
 
-import com.example.calorieCounter.dto.FoodRequest;
+import com.example.calorieCounter.dto.FoodImportDto;
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
 
-public class BjuSumValidator implements ConstraintValidator<ValidBjuSum, FoodRequest> {
+public class BjuSumValidator implements ConstraintValidator<ValidBjuSum, FoodImportDto> {
 
     @Override
-    public boolean isValid(FoodRequest value, ConstraintValidatorContext context) {
+    public boolean isValid(FoodImportDto value, ConstraintValidatorContext context) {
 
         if (value == null) {
             return true;
         }
 
-        double protein = value.getProtein() == null ? 0 : value.getProtein();
-        double fat = value.getFat() == null ? 0 : value.getFat();
-        double carb = value.getCarb() == null ? 0 : value.getCarb();
+        double protein = value.protein() == null ? 0 : value.protein();
+        double fat = value.fat() == null ? 0 : value.fat();
+        double carb = value.carb() == null ? 0 : value.carb();
         double sum = protein + fat + carb;
         return sum <= 100;
     }

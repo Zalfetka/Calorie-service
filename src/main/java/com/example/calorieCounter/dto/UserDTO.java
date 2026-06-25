@@ -2,6 +2,7 @@ package com.example.calorieCounter.dto;
 
 import com.example.calorieCounter.enums.Status;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -13,6 +14,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class UserDTO implements Serializable {
     private static final long serialVersionUID = 1L;
     private String eventId;
